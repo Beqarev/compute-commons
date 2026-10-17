@@ -25,6 +25,7 @@ export const T = {
   taskVersions: "task_versions",
   taskItems: "task_items",
   claims: "claims",
+  takeovers: "claim_takeovers",
   logs: "logs",
   settings: "settings",
   apiTokens: "api_tokens",

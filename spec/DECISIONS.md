@@ -29,6 +29,9 @@ Short record of what the team has decided, parked or assigned. Newest at the bot
 | D16 | One concept: tasks | **No separate targets, skills or routines.** A task is a title, description and prompt, either one-off or routine (redo every N days), with an optional item list (one line per site, repo, file…) where each line is claimed separately so nobody doubles up. Every attempt writes a log (who, when, what, branch). Targets added a page, kinds and tags without a benefit a plain list doesn't give. Revises D12/D13 wording ("skill on a target" → "task item"). |
 | D17 | No code-specific fields | **Tasks are not only about code.** No branch link, risk label (report-only / changes-files) or tools-needed fields. Where a result goes, what a task needs and how careful to be are written in the task prompt or team policy; Claude reports results as a summary plus free-text details. Approval and versions stay: they keep unattended runs safe for any kind of task. Narrows D11/D15 to code tasks. |
 
+| D18 | Expired-lease takeover (Beqa's build) | **Takeover tickets, not transactions.** Tested on our 1.8.1 server: with 5 parallel "delete stale claim + create mine" transactions, 2 committed, and a late transaction stole a fresh claim. Instead, each stale claim has one ticket row id (hash of item id + holder + claimedAt) in `claim_takeovers`; only the claimer that creates it (others get 409) may replace the claim. Tickets are never deleted. Transactions stay only for `finish` (log + item status + claim delete, all or nothing). Proven by `lib/__tests__/claims.live.test.ts`. |
+| D19 | Failed and skipped items (Beqa's build) | **Out of the queue until a lead resets them.** Otherwise an unattended run gets the same broken item back from `list_work` and loops. |
+
 ## Consequences of D4 (to design)
 
 - This adds a small server: it stores each clan's config and roles, and the MCP server reads the clan from it.

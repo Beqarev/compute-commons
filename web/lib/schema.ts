@@ -84,6 +84,14 @@ export const SCHEMA: TableDef[] = [
     indexes: [],
   },
   {
+    // Takeover tickets: row id = hash of one stale claim, so only one claimer can replace it.
+    // Never deleted, or a late racer could reuse an old ticket. See lib/claims.ts.
+    id: "claim_takeovers",
+    name: "Claim takeovers",
+    columns: [id("itemId"), id("by"), date("at")],
+    indexes: [],
+  },
+  {
     id: "logs",
     name: "Logs",
     columns: [
