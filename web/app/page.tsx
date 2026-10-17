@@ -1,7 +1,8 @@
 import { connection } from "next/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DB_ID, adminTables, ping } from "@/lib/appwrite";
+import { Query } from "node-appwrite";
+import { DB_ID, T, adminTables, ping } from "@/lib/appwrite";
 
 // Temporary status page for hour 0. Becomes a redirect to /board once login exists.
 
@@ -14,9 +15,24 @@ async function databaseStatus(): Promise<"ready" | "missing" | "error"> {
   }
 }
 
+async function rowCounts(): Promise<[string, number | null][]> {
+  const db = adminTables();
+  return Promise.all(
+    Object.values(T).map(async (tableId) => {
+      try {
+        const { total } = await db.listRows({ databaseId: DB_ID, tableId, queries: [Query.limit(1)], total: true });
+        return [tableId, total] as [string, number];
+      } catch {
+        return [tableId, null] as [string, null];
+      }
+    }),
+  );
+}
+
 export default async function Home() {
   await connection();
   const [up, db] = await Promise.all([ping(), databaseStatus()]);
+  const counts = db === "ready" ? await rowCounts() : [];
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-6 p-8">
@@ -42,6 +58,16 @@ export default async function Home() {
               {db === "ready" ? "ready" : db === "missing" ? "not created yet" : "error"}
             </Badge>
           </div>
+          {counts.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-2 border-t pt-4">
+              {counts.map(([table, n]) => (
+                <div key={table} className="rounded-md bg-muted px-2 py-1.5">
+                  <div className="font-mono text-xs text-muted-foreground">{table}</div>
+                  <div className="text-lg font-semibold">{n ?? "missing"}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </main>

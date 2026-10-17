@@ -14,6 +14,11 @@ export const DB_ID = process.env.APPWRITE_DATABASE_ID ?? "commons_beqa";
 export const TEAM_ID = process.env.TEAM_ID ?? "rando";
 export const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "commons_session";
 
+/** Scripts that write or wipe data call this first: teammates' databases live in the same project. */
+export function assertOwnDatabase() {
+  if (!DB_ID.startsWith("commons_beqa")) throw new Error(`Refusing to touch database "${DB_ID}": not this build's.`);
+}
+
 export const T = {
   members: "members",
   tasks: "tasks",
