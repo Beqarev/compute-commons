@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "setup:appwrite": "node --env-file=.env.local --conditions=react-server --import tsx scripts/setup-appwrite.ts",
     "seed": "node --env-file=.env.local --conditions=react-server --import tsx scripts/seed.ts",
     "token": "node --env-file=.env.local --conditions=react-server --import tsx scripts/token.ts",
