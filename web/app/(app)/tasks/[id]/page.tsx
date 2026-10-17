@@ -29,15 +29,15 @@ export default async function TaskPage({
   searchParams: Promise<{ preview?: string }>;
 }) {
   const [{ id }, { preview }] = await Promise.all([params, searchParams]);
-  const [member, task] = await Promise.all([requireMember(), getTask(id)]);
-  if (!task) notFound();
-
-  const [versions, work, settings, members] = await Promise.all([
+  const [member, task, versions, work, settings, members] = await Promise.all([
+    requireMember(),
+    getTask(id),
     listVersions(id),
     loadWork(),
     getSettings(),
     adminTables().listRows<Member & Models.Row>({ databaseId: DB_ID, tableId: T.members, queries: [Query.equal("teamId", [TEAM_ID])] }),
   ]);
+  if (!task) notFound();
   const rows = work.filter((r) => r.task.$id === id).sort((a, b) => task.items.indexOf(a.item.item) - task.items.indexOf(b.item.item));
   const nameOf = new Map(members.rows.map((m) => [m.$id, m.name]));
   const isLead = member.role === "lead";

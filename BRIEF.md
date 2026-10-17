@@ -60,3 +60,25 @@ Score each 1–5. Bring the running app and the demo, not slides.
 - Appwrite: endpoint `https://api.rando.ge/v1`, project `hakatoni` (`6ad3926b000731cc9576`), server 1.8.1.
 - **My database ID is `commons_beqa`** so my data never collides with my teammates' builds in the same Appwrite project.
 - Secrets are in `.env.local` at the repo root (git-ignored). The app moves it into `web/` once scaffolded.
+
+## Roadmap (not built today, on purpose)
+
+Built and live: everything in "What the finished build has" above, deployed at https://compute-commons-beqa.vercel.app, with a real Claude routine running through the `commons` connector.
+
+Next, in rough order of value:
+
+1. **OAuth for the MCP endpoint.** Today the routine authenticates with a static `Authorization` header (a connector beta). OAuth (Better Auth MCP plugin or a hosted provider) would let each person sign in, and works for organizations without request headers.
+2. **Members page.** Invite by email, change roles, remove. Today members come from the seed script.
+3. **Realtime board.** Appwrite Realtime instead of 5-second polling.
+4. **Board filters and quick add.** Filter by task or status, and a one-line "add task" bar for leads.
+5. **Schedule targeting.** Tags, so two routines can work different parts of the queue.
+6. **"Suggest a change" for members.** A note on a task that the lead can turn into a new version.
+7. **More blanks than `{{item}}`.** Per-item fields, for example `{{url}}` and `{{owner}}`.
+8. **Editor and tests.** A CodeMirror prompt editor, and Playwright end-to-end tests for the demo flow.
+9. **Multiple teams.** Every row already carries `teamId`. Add team switching and per-team settings, including the timezone.
+10. **Shared task library across teams, and clan mode** (see `spec/POSITIONING.md`).
+
+Found while building (details in `spec/DECISIONS.md` D18–D19):
+- Appwrite 1.8.1 transactions do not stop two claimers replacing the same expired claim. Takeover tickets do, and a live test proves it.
+- Unattended runs must never ask questions: the MCP instructions now say to call `fail` instead. Failed and skipped items wait for a lead, so a schedule never loops on them.
+- A routine's sandbox limits network access. Write task prompts so Claude can do them with web fetches, or say in the prompt what access the task needs.

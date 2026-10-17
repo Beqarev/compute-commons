@@ -105,22 +105,25 @@ export async function saveTask(
     items: input.items,
     priority: input.priority,
   };
-  const before = id ? await getTask(id) : null;
+  const [before, versions] = id ? await Promise.all([getTask(id), listVersions(id)]) : [null, []];
   if (id && !before) throw new Error("Task not found");
 
   const taskId = before?.$id ?? ID.unique();
-  const latest = before ? (await listVersions(taskId))[0] : undefined;
+  const latest = versions[0];
   const newVersion = !latest || latest.prompt !== input.prompt;
   const version = newVersion ? nextVersion(before?.currentVersion ?? 0) : before!.currentVersion;
 
-  if (newVersion) {
-    await db.createRow({
-      databaseId: DB_ID,
-      tableId: T.taskVersions,
-      rowId: ID.unique(),
-      data: { taskId, version, prompt: input.prompt, authorId, createdAt: new Date().toISOString() },
-    });
-  }
+  // The version row and items go first, so currentVersion never points at a missing version.
+  await Promise.all([
+    newVersion &&
+      db.createRow({
+        databaseId: DB_ID,
+        tableId: T.taskVersions,
+        rowId: ID.unique(),
+        data: { taskId, version, prompt: input.prompt, authorId, createdAt: new Date().toISOString() },
+      }),
+    ensureItems(taskId, input.items),
+  ]);
   if (before) {
     await db.updateRow({ databaseId: DB_ID, tableId: T.tasks, rowId: taskId, data: { ...fields, currentVersion: version } });
   } else {
@@ -131,7 +134,6 @@ export async function saveTask(
       data: { ...fields, teamId: TEAM_ID, currentVersion: version, approvedVersion: null },
     });
   }
-  await ensureItems(taskId, input.items);
   return { id: taskId, version, newVersion, before };
 }
 
