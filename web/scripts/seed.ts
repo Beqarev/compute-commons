@@ -1,6 +1,7 @@
 // Seeds a realistic starting state for the demo. Safe to run again: existing users and tasks are kept.
 //   npm run seed            add what is missing
-//   npm run seed -- --reset wipe every row in this build's database first (users are kept)
+//   npm run seed -- --reset wipe this build's rows first (users, settings and MCP tokens are kept,
+//                           so connected Claude sessions keep working)
 // Test logins are written to web/.env.seed.local (git-ignored), never printed.
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -226,7 +227,7 @@ async function seedTask(t: SeedTask, memberIds: Record<string, string>) {
 // ---- reset ----------------------------------------------------------------------------------
 async function wipe() {
   for (const tableId of Object.values(T)) {
-    if (tableId === T.settings) continue;
+    if (tableId === T.settings || tableId === T.apiTokens) continue;
     for (;;) {
       const { rows } = await db.listRows({ databaseId: DB_ID, tableId, queries: [Query.limit(100)] });
       if (!rows.length) break;
