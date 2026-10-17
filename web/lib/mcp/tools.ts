@@ -4,6 +4,8 @@ import { Query, type Models } from "node-appwrite";
 import type { McpServer } from "@modelcontextprotocol/server";
 import { DB_ID, T, adminTables } from "../appwrite";
 import { ClaimError, claim, finish, getClaim, heartbeat, isActive, recordSkip } from "../claims";
+import { audit } from "../audit";
+import { formatLeft, formatTime } from "../format";
 import { buildPrompt } from "../prompt";
 import { getSettings } from "../settings";
 import { callerId } from "../tokens";
@@ -27,7 +29,7 @@ function callerOf(ctx: Ctx): Caller {
   return caller;
 }
 
-const hhmm = (iso: string) => new Date(iso).toISOString().slice(11, 16) + " UTC";
+const hhmm = (iso: string) => `${formatTime(iso)} (${formatLeft(iso)} from now)`;
 const itemLabel = (item: string) => item || "(whole task)";
 
 async function loadItem(itemId: string) {
@@ -121,6 +123,8 @@ export function registerTools(server: McpServer) {
         });
       }
       if (r.reason === "taken") {
+        // Counted on the board as "collisions prevented".
+        await audit(by, "claim.taken", `item:${itemId}`, undefined, { heldBy: r.heldBy });
         return reply(`Taken: ${r.heldBy} is working on it. Do not work on this item; claim the next one from list_work.`, {
           itemId,
           taken: true,

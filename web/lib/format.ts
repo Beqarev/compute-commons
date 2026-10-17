@@ -1,5 +1,9 @@
-const dateTime = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
+// All times shown to people (board, logs, MCP replies) use one team timezone, so Claude's
+// "claimed until 21:48" matches the board. Servers (e.g. Vercel) run in UTC otherwise.
+export const TIME_ZONE = process.env.APP_TIMEZONE ?? "Asia/Tbilisi";
+
+const dateTime = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: TIME_ZONE });
+const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: TIME_ZONE });
 
 /** "17 Oct, 21:48" */
 export const formatWhen = (iso: string) => dateTime.format(new Date(iso));

@@ -32,3 +32,13 @@ describe("tokens", () => {
     expect(newTokenString()).not.toBe(t);
   });
 });
+
+describe("format", () => {
+  it("shows lease time left and expiry", async () => {
+    const { formatLeft } = await import("../format");
+    const now = new Date("2026-10-20T12:00:00Z");
+    expect(formatLeft("2026-10-20T13:52:00Z", now)).toBe("1h 52m");
+    expect(formatLeft("2026-10-20T12:04:00Z", now)).toBe("4m");
+    expect(formatLeft("2026-10-20T11:00:00Z", now)).toBe("expired");
+  });
+});

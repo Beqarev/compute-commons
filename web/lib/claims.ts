@@ -220,3 +220,23 @@ export async function recordSkip(itemId: string, by: string, byName: string, rea
     !!current,
   );
 }
+
+/** Lead action: free a stuck claim. Returns the released claim, or null when there was none. */
+export async function releaseClaim(itemId: string): Promise<Claim | null> {
+  const current = await getClaim(itemId);
+  if (!current) return null;
+  await adminTables()
+    .deleteRow({ databaseId: DB_ID, tableId: T.claims, rowId: itemId })
+    .catch((e) => {
+      if (code(e) !== 404) throw e;
+    });
+  return current;
+}
+
+/** Lead action: put a done, failed or skipped item back in the queue. Logs are kept. */
+export async function resetItem(itemId: string): Promise<ItemStatus | null> {
+  const item = await getOrNull<TaskItem>(T.taskItems, itemId);
+  if (!item) return null;
+  await adminTables().updateRow({ databaseId: DB_ID, tableId: T.taskItems, rowId: itemId, data: { status: "available" } });
+  return item.status;
+}
