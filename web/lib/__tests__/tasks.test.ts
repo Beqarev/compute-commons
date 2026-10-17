@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { itemRowId, nextVersion, parseItems } from "../tasks";
+import { lineDiff } from "../diff";
 
 describe("tasks", () => {
   it("increments versions from 0", () => {
@@ -14,5 +15,17 @@ describe("tasks", () => {
     expect(id).toBe(itemRowId("task1", "https://a.ge"));
     expect(id).not.toBe(itemRowId("task2", "https://a.ge"));
     expect(id).toMatch(/^[a-z0-9]{1,36}$/);
+  });
+});
+
+describe("lineDiff", () => {
+  it("marks added, removed and unchanged lines", () => {
+    expect(lineDiff("a\nb\nc", "a\nB\nc\nd")).toEqual([
+      { type: "same", text: "a" },
+      { type: "del", text: "b" },
+      { type: "add", text: "B" },
+      { type: "same", text: "c" },
+      { type: "add", text: "d" },
+    ]);
   });
 });
