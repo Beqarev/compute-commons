@@ -63,3 +63,19 @@ export async function revokeToken(id: string): Promise<void> {
 export function callerId(c: Caller): { by: string; byName: string } {
   return c.kind === "team" ? { by: "team", byName: "Team schedule" } : { by: c.memberId, byName: c.name };
 }
+
+/** Newest first. Pass an owner to list only that person's tokens. */
+export async function listTokens(owner?: string): Promise<(ApiToken & Models.Row)[]> {
+  const { rows } = await adminTables().listRows<ApiToken & Models.Row>({
+    databaseId: DB_ID,
+    tableId: T.apiTokens,
+    queries: [...(owner ? [Query.equal("owner", [owner])] : []), Query.orderDesc("$createdAt"), Query.limit(100)],
+  });
+  return rows;
+}
+
+export async function getToken(id: string): Promise<(ApiToken & Models.Row) | null> {
+  return adminTables()
+    .getRow<ApiToken & Models.Row>({ databaseId: DB_ID, tableId: T.apiTokens, rowId: id })
+    .catch(() => null);
+}

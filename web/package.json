@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "setup:appwrite": "node --env-file=.env.local --conditions=react-server --import tsx scripts/setup-appwrite.ts",
     "seed": "node --env-file=.env.local --conditions=react-server --import tsx scripts/seed.ts",
-    "token": "node --env-file=.env.local --conditions=react-server --import tsx scripts/token.ts"
+    "token": "node --env-file=.env.local --conditions=react-server --import tsx scripts/token.ts",
+    "routine": "node --import tsx scripts/routine.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

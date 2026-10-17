@@ -16,3 +16,13 @@ export function formatLeft(iso: string, now = new Date()): string {
   if (mins <= 0) return "expired";
   return mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
 }
+
+/** "just now" / "4s ago" / "12m ago" / "3h ago" / "17 Oct, 21:48" */
+export function formatAgo(iso: string, now = new Date()): string {
+  const secs = Math.round((now.getTime() - new Date(iso).getTime()) / 1000);
+  if (secs < 3) return "just now";
+  if (secs < 60) return `${secs}s ago`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+  return formatWhen(iso);
+}

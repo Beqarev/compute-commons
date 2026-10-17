@@ -8,6 +8,7 @@ export const MCP_INSTRUCTIONS = [
   "4. On long items, call heartbeat at least every 30 minutes, or your lease runs out and someone else may take the item.",
   "5. Finish each item with complete (a short summary, plus details: what you did, where the result is, anything a human should know), fail (reason), or skip (reason, when you decide not to take it).",
   "6. Then call list_work again. Stop when it is empty or the budget is used up.",
+  "You may be running unattended (a schedule): never stop to ask a question or wait for approval. If you cannot do an item (missing access, unclear task), call fail with the reason so a human sees it, then move on.",
 ].join("\n");
 
 export const SETUP_PROMPT = `Use the "commons" MCP connector and work through our team's task queue.`;
